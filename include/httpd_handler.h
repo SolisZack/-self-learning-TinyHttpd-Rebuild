@@ -3,6 +3,9 @@
 //
 
 #include <map>
+#include <iostream>
+#include <cstring>
+#include <vector>
 #include <string>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -26,14 +29,15 @@ private:
     int client_fd_;
     struct sockaddr_in client_addr_{};
 
-    // used to parse http message
+    // used to parse http msg's first line and its head
     char buffer_[MAX_BUF_SIZE]{};
-    size_t buffer_index_, buffer_len_;  //size_t for multi platform
+    std::string buffer_str_;
+    std::vector<std::string> buffer_byline_;
 
     // parse result
-    char *query_;
-    char method_[255]{}, url_[255]{};
-    std::map<std::string, std::string> m_header_;
+    std::string method_, url_;
+    std::map<std::string, std::string> header_, query_, params_;
+
 public:
     // INIT SOCKET
     Httpd_handler();
@@ -46,22 +50,22 @@ public:
 
     inline void set_client_addr(struct sockaddr_in &addr);
 
-    inline void close_socket();
+    inline void close_socket() const;
 
     inline void reset();
 
     // GET AND ANALYSE REQUEST
-    int get_line();
+    int receive_request(int client_socket);
 
-    inline void parse_method();
+    void parse_request();
 
-    inline void parse_url();
+    inline void parse_request_line();
 
     inline void parse_header();
 
-    int parse_params(const char* str, std::string &key, std::string &value);
+    inline void parse_body();
 
-    inline char* get_url();
+    inline std::string get_url();
 
     inline int get_content_length();
 
@@ -69,13 +73,13 @@ public:
 
     inline bool is_GET();
 
-    void error501();
+    void error501() const;
 
-    void error500();
+    void error500() const;
 
-    void error404();
+    void error404() const;
 
-    void error400();
+    void error400() const;
 
     // HANDLE HTTP REQUEST
     void serve_file(const char *path);
@@ -83,8 +87,6 @@ public:
     int discard_body();  // ?
 
 
-
 };
-
 
 #endif //MYHTTPD_Httpd_handler_H

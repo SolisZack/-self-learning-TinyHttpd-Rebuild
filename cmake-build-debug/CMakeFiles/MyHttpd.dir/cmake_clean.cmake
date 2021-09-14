@@ -2,7 +2,7 @@ file(REMOVE_RECURSE
   "../bin/MyHttpd"
   "../bin/MyHttpd.pdb"
   "CMakeFiles/MyHttpd.dir/src/httpd.cpp.o"
-  "CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.o"
+  "CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.o"
   "CMakeFiles/MyHttpd.dir/src/main.cpp.o"
 )
 

@@ -5,7 +5,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
   "/home/wwd/CLionProjects/MyHttpd/src/httpd.cpp" "/home/wwd/CLionProjects/MyHttpd/cmake-build-debug/CMakeFiles/MyHttpd.dir/src/httpd.cpp.o"
-  "/home/wwd/CLionProjects/MyHttpd/src/httpd_socket.cpp" "/home/wwd/CLionProjects/MyHttpd/cmake-build-debug/CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.o"
+  "/home/wwd/CLionProjects/MyHttpd/src/httpd_handler.cpp" "/home/wwd/CLionProjects/MyHttpd/cmake-build-debug/CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.o"
   "/home/wwd/CLionProjects/MyHttpd/src/main.cpp" "/home/wwd/CLionProjects/MyHttpd/cmake-build-debug/CMakeFiles/MyHttpd.dir/src/main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")

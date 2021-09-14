@@ -90,18 +90,18 @@ CMakeFiles/MyHttpd.dir/src/httpd.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/MyHttpd.dir/src/httpd.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wwd/CLionProjects/MyHttpd/src/httpd.cpp -o CMakeFiles/MyHttpd.dir/src/httpd.cpp.s
 
-CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.o: CMakeFiles/MyHttpd.dir/flags.make
-CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.o: ../src/httpd_socket.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wwd/CLionProjects/MyHttpd/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.o -c /home/wwd/CLionProjects/MyHttpd/src/httpd_socket.cpp
+CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.o: CMakeFiles/MyHttpd.dir/flags.make
+CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.o: ../src/httpd_handler.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/wwd/CLionProjects/MyHttpd/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.o -c /home/wwd/CLionProjects/MyHttpd/src/httpd_handler.cpp
 
-CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wwd/CLionProjects/MyHttpd/src/httpd_socket.cpp > CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.i
+CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/wwd/CLionProjects/MyHttpd/src/httpd_handler.cpp > CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.i
 
-CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wwd/CLionProjects/MyHttpd/src/httpd_socket.cpp -o CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.s
+CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/wwd/CLionProjects/MyHttpd/src/httpd_handler.cpp -o CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.s
 
 CMakeFiles/MyHttpd.dir/src/main.cpp.o: CMakeFiles/MyHttpd.dir/flags.make
 CMakeFiles/MyHttpd.dir/src/main.cpp.o: ../src/main.cpp
@@ -119,14 +119,14 @@ CMakeFiles/MyHttpd.dir/src/main.cpp.s: cmake_force
 # Object files for target MyHttpd
 MyHttpd_OBJECTS = \
 "CMakeFiles/MyHttpd.dir/src/httpd.cpp.o" \
-"CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.o" \
+"CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.o" \
 "CMakeFiles/MyHttpd.dir/src/main.cpp.o"
 
 # External object files for target MyHttpd
 MyHttpd_EXTERNAL_OBJECTS =
 
 ../bin/MyHttpd: CMakeFiles/MyHttpd.dir/src/httpd.cpp.o
-../bin/MyHttpd: CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.o
+../bin/MyHttpd: CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.o
 ../bin/MyHttpd: CMakeFiles/MyHttpd.dir/src/main.cpp.o
 ../bin/MyHttpd: CMakeFiles/MyHttpd.dir/build.make
 ../bin/MyHttpd: CMakeFiles/MyHttpd.dir/link.txt

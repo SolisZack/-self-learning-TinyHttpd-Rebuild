@@ -87,7 +87,7 @@
 		<Unit filename="/home/wwd/CLionProjects/MyHttpd/src/httpd.cpp">
 			<Option target="MyHttpd"/>
 		</Unit>
-		<Unit filename="/home/wwd/CLionProjects/MyHttpd/src/httpd_socket.cpp">
+		<Unit filename="/home/wwd/CLionProjects/MyHttpd/src/httpd_handler.cpp">
 			<Option target="MyHttpd"/>
 		</Unit>
 		<Unit filename="/home/wwd/CLionProjects/MyHttpd/src/main.cpp">

@@ -170,32 +170,32 @@ src/httpd.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyHttpd.dir/build.make CMakeFiles/MyHttpd.dir/src/httpd.cpp.s
 .PHONY : src/httpd.cpp.s
 
-src/httpd_socket.o: src/httpd_socket.cpp.o
+src/httpd_handler.o: src/httpd_handler.cpp.o
 
-.PHONY : src/httpd_socket.o
+.PHONY : src/httpd_handler.o
 
 # target to build an object file
-src/httpd_socket.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyHttpd.dir/build.make CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.o
-.PHONY : src/httpd_socket.cpp.o
+src/httpd_handler.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyHttpd.dir/build.make CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.o
+.PHONY : src/httpd_handler.cpp.o
 
-src/httpd_socket.i: src/httpd_socket.cpp.i
+src/httpd_handler.i: src/httpd_handler.cpp.i
 
-.PHONY : src/httpd_socket.i
+.PHONY : src/httpd_handler.i
 
 # target to preprocess a source file
-src/httpd_socket.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyHttpd.dir/build.make CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.i
-.PHONY : src/httpd_socket.cpp.i
+src/httpd_handler.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyHttpd.dir/build.make CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.i
+.PHONY : src/httpd_handler.cpp.i
 
-src/httpd_socket.s: src/httpd_socket.cpp.s
+src/httpd_handler.s: src/httpd_handler.cpp.s
 
-.PHONY : src/httpd_socket.s
+.PHONY : src/httpd_handler.s
 
 # target to generate assembly for a file
-src/httpd_socket.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyHttpd.dir/build.make CMakeFiles/MyHttpd.dir/src/httpd_socket.cpp.s
-.PHONY : src/httpd_socket.cpp.s
+src/httpd_handler.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/MyHttpd.dir/build.make CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.s
+.PHONY : src/httpd_handler.cpp.s
 
 src/main.o: src/main.cpp.o
 
@@ -236,9 +236,9 @@ help:
 	@echo "... src/httpd.o"
 	@echo "... src/httpd.i"
 	@echo "... src/httpd.s"
-	@echo "... src/httpd_socket.o"
-	@echo "... src/httpd_socket.i"
-	@echo "... src/httpd_socket.s"
+	@echo "... src/httpd_handler.o"
+	@echo "... src/httpd_handler.i"
+	@echo "... src/httpd_handler.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

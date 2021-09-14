@@ -6,7 +6,27 @@
 
 #IncludeRegexTransform: 
 
-/home/wwd/CLionProjects/MyHttpd/src/main.cpp
+../include/httpd_handler.h
+map
+-
 iostream
 -
+cstring
+-
+vector
+-
+string
+-
+unistd.h
+-
+sys/socket.h
+-
+arpa/inet.h
+-
+netinet/in.h
+-
+
+/home/wwd/CLionProjects/MyHttpd/src/httpd_handler.cpp
+httpd_handler.h
+/home/wwd/CLionProjects/MyHttpd/src/httpd_handler.h
 

@@ -8,19 +8,16 @@
 
 class Httpd{
 private:
-    struct sockaddr_in server_socket_;
+    int server_socket_;
 public:
-    // INIT
     Httpd();
 
-    ~Httpd();
-
     // HTTPD RUN
-    void accept_request(Httpd_handler* handler);
-
     void start_up(u_short port);
 
     void loop();
+
+    void handle_request(Httpd_handler& handler, int& client_socket);
 };
 
 
