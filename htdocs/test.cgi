@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "Testing CGI function"
+echo "URL:$URL"
+echo "REQUEST_VERSION:$REQUEST_VERSION"
+echo "REQUEST_METHOD:$REQUEST_METHOD"
+echo "CONNECTION:$CONNECTION"
