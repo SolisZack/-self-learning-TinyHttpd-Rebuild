@@ -1,1 +1,1 @@
-/usr/bin/c++   -D DEBUG -std=c++11 -latomic -pthread -g   CMakeFiles/MyHttpd.dir/src/httpd.cpp.o CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.o CMakeFiles/MyHttpd.dir/src/main.cpp.o  -o ../bin/MyHttpd 
+/usr/bin/c++   -std=c++11 -latomic -pthread -g   CMakeFiles/MyHttpd.dir/src/httpd.cpp.o CMakeFiles/MyHttpd.dir/src/httpd_handler.cpp.o CMakeFiles/MyHttpd.dir/src/main.cpp.o  -o ../bin/MyHttpd 

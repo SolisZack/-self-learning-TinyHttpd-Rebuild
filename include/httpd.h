@@ -12,12 +12,14 @@ private:
 public:
     Httpd();
 
+    ~Httpd();
+
     // HTTPD RUN
     void start_up(u_short port);
 
     void loop();
 
-    void handle_request(Httpd_handler& handler, int& client_socket);
+    void handle_request(Httpd_handler& handler);
 };
 
 

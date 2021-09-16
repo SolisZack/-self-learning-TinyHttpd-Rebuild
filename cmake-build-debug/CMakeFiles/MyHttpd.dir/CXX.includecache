@@ -6,8 +6,14 @@
 
 #IncludeRegexTransform: 
 
+../include/httpd.h
+httpd_handler.h
+../include/httpd_handler.h
+
 ../include/httpd_handler.h
 map
+-
+fstream
 -
 iostream
 -
@@ -26,7 +32,21 @@ arpa/inet.h
 netinet/in.h
 -
 
+/home/wwd/CLionProjects/MyHttpd/src/httpd.cpp
+httpd.h
+/home/wwd/CLionProjects/MyHttpd/src/httpd.h
+
 /home/wwd/CLionProjects/MyHttpd/src/httpd_handler.cpp
+wait.h
+-
 httpd_handler.h
 /home/wwd/CLionProjects/MyHttpd/src/httpd_handler.h
+
+/home/wwd/CLionProjects/MyHttpd/src/main.cpp
+iostream
+-
+httpd_handler.h
+/home/wwd/CLionProjects/MyHttpd/src/httpd_handler.h
+httpd.h
+/home/wwd/CLionProjects/MyHttpd/src/httpd.h
 

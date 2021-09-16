@@ -3,6 +3,7 @@
 //
 
 #include <map>
+#include <fstream>
 #include <iostream>
 #include <cstring>
 #include <vector>
@@ -15,6 +16,8 @@
 #ifndef MYHTTPD_Httpd_handler_H
 #define MYHTTPD_Httpd_handler_H
 
+#define STDIN 0
+#define STDOUT 1
 #define MAX_BUF_SIZE 1024
 #define STATUS_200 "HTTP/1.0 200 OK\r\n"
 #define STATUS_400 "HTTP/1.0 400 BAD REQUEST\r\n"
@@ -30,32 +33,30 @@ private:
     struct sockaddr_in client_addr_{};
 
     // used to parse http msg's first line and its head
-    char buffer_[MAX_BUF_SIZE]{};
     std::string buffer_str_;
     std::vector<std::string> buffer_byline_;
 
     // parse result
-    std::string method_, url_;
+    std::string method_, url_, ver_;
     std::map<std::string, std::string> header_, query_, params_;
+
+    // web
+    std::string path_;
 
 public:
     // INIT SOCKET
     Httpd_handler();
 
-    Httpd_handler(int fd, struct  sockaddr_in &addr);
+    Httpd_handler(int& fd, struct sockaddr_in& addr);
 
     ~Httpd_handler();
 
-    inline void set_client_fd(int fd);
-
-    inline void set_client_addr(struct sockaddr_in &addr);
-
-    inline void close_socket() const;
+    void close_socket() const;
 
     inline void reset();
 
     // GET AND ANALYSE REQUEST
-    int receive_request(int client_socket);
+    int receive_request();
 
     void parse_request();
 
@@ -65,7 +66,9 @@ public:
 
     inline void parse_body();
 
-    inline std::string get_url();
+    inline void parse_params(const std::string& params_str, std::map<std::string, std::string>& params_map);
+
+    inline void check_maps(std::map<std::string, std::string>& params_map);
 
     inline int get_content_length();
 
@@ -73,19 +76,22 @@ public:
 
     inline bool is_GET();
 
-    void error501() const;
+    bool use_cgi();
 
-    void error500() const;
+    inline void send_status200() const;
 
-    void error404() const;
+    inline void send_error400() const;
 
-    void error400() const;
+    inline void send_error404() const;
+
+    inline void send_error500() const;
+
+    inline void send_error501() const;
 
     // HANDLE HTTP REQUEST
-    void serve_file(const char *path);
+    void serve_file();
 
-    int discard_body();  // ?
-
+    void execute_cgi();
 
 };
 
