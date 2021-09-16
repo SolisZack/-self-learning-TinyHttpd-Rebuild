@@ -1,14 +1,24 @@
 //
 // Created by wwd on 2021/9/14.
 //
+
+#include <fcntl.h>
+#include <sys/epoll.h>
 #include "httpd_handler.h"
 
 #ifndef MYHTTPD_HTTPD_H
 #define MYHTTPD_HTTPD_H
 
+#define SOCKET_QUEUE_SIZE 20
+#define EPOLL_FD_SIZE 256
+
 class Httpd{
 private:
     int server_socket_;
+    // variables for epoll
+    int epoll_fd_;
+    struct epoll_event event_, event_list_[SOCKET_QUEUE_SIZE];
+    std::map<int, Httpd_handler*> record;  //
 public:
     Httpd();
 
@@ -19,7 +29,9 @@ public:
 
     void loop();
 
-    void handle_request(Httpd_handler& handler);
+    void modify_event(int& socket, uint32_t events);
+
+    Httpd_handler* get_handler(int& client_socket);
 };
 
 

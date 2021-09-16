@@ -8,6 +8,7 @@
 #include <cstring>
 #include <vector>
 #include <string>
+#include <wait.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -49,6 +50,8 @@ public:
 
     Httpd_handler(int& fd, struct sockaddr_in& addr);
 
+    Httpd_handler(const Httpd_handler& copy);
+
     ~Httpd_handler();
 
     void close_socket() const;
@@ -56,7 +59,7 @@ public:
     inline void reset();
 
     // GET AND ANALYSE REQUEST
-    int receive_request();
+    void receive_request();
 
     void parse_request();
 
@@ -75,6 +78,8 @@ public:
     inline bool is_POST();
 
     inline bool is_GET();
+
+    bool method_legal();
 
     bool use_cgi();
 

@@ -2,7 +2,6 @@
 // Created by wwd on 2021/9/14.
 //
 
-#include <wait.h>
 #include "httpd_handler.h"
 
 Httpd_handler::Httpd_handler(){
@@ -14,6 +13,19 @@ Httpd_handler::Httpd_handler(int& fd, struct  sockaddr_in& addr){
     client_fd_ = fd;
     client_addr_ = addr;
     path_ = "/home/wwd/CLionProjects/MyHttpd/htdocs";
+}
+
+Httpd_handler::Httpd_handler(const Httpd_handler &copy) {
+    client_fd_ = copy.client_fd_;
+    client_addr_ = copy.client_addr_;
+    method_ = copy.method_;
+    url_ = copy.url_;
+    ver_ = copy.ver_;
+    header_ = copy.header_;
+    query_ = copy.query_;
+    params_ = copy.params_;
+    path_ = copy.path_;
+
 }
 
 Httpd_handler::~Httpd_handler(){
@@ -31,36 +43,37 @@ void Httpd_handler::reset() {
 
 // receive the whole http request and store it in string buffer_str_
 // and divide the string by line and store them into vector buffer_by_line_
-int Httpd_handler::receive_request() {
+void Httpd_handler::receive_request() {
+    int num_read;
     char buffer[MAX_BUF_SIZE];
     if (client_fd_ == 0)
         perror("ERROR: no client socket accept");
-    int err = recv(client_fd_, buffer, sizeof(buffer), 0);
-    if (err == -1)
-        perror("ERROR: read msg from client failed\n");
-    else{
-        int substr_start = 0;
-        buffer_str_ = buffer;
-#ifdef DEBUG
-        std::cout << "\nINCOMING HTTP REQUEST:\n" << buffer_str_ << std::endl;
-#endif
-        for (int i = 0; i < buffer_str_.size(); i++){
-            if (buffer_str_[i] == '\n'){
-                std::string temp = buffer_str_.substr(substr_start, i - substr_start);
-                substr_start = i + 1;
-                buffer_byline_.push_back(temp);
-            }
+    // recv based on non-block socket
+    while ((num_read = recv(client_fd_, buffer, sizeof(buffer), 0)) < 0) {
+        if (errno == EWOULDBLOCK)
+            std::cout << "waiting for data\n";
+    }
+    buffer[num_read] = '\0';
+    int substr_start = 0;
+    buffer_str_ = buffer;
+    // get request line and header
+    for (int i = 0; i < buffer_str_.size(); i++){
+        if (buffer_str_[i] == '\n'){
+            std::string temp = buffer_str_.substr(substr_start, i - substr_start);
+            if (temp == "\r\n")
+                break;
+            substr_start = i + 1;
+            buffer_byline_.push_back(temp);
         }
     }
+#ifdef DEBUG
+    std::cout << "\nINCOMING HTTP REQUEST:\n" << buffer_str_ << std::endl;
+#endif
 }
 
 // functions below are added keywords "inline", so can't directly use them in class Httpd
 void Httpd_handler::parse_request() {
     parse_request_line();
-    if (!is_POST() && !is_GET()){
-        send_error501();
-        return;
-    }
     parse_header();
     parse_body();
 }
@@ -181,6 +194,14 @@ bool Httpd_handler::is_GET() {
     return method_ == "GET";
 }
 
+bool Httpd_handler::method_legal() {
+    if (!is_POST() && !is_GET()){
+        send_error501();
+        return false;
+    }
+    return true;
+}
+
 // only execute cgi when the url contains /*.cgi,
 bool Httpd_handler::use_cgi() {
     if (strstr(url_.c_str(), ".cgi") != nullptr)
@@ -193,7 +214,10 @@ void Httpd_handler::send_status200() const {
                     SERVER_STRING +
                     "Content-Type: text/html\r\n" +
                     "\r\n";
-    ::send(client_fd_, s.c_str(), strlen(s.c_str()), 0);
+    while (send(client_fd_, s.c_str(), strlen(s.c_str()), 0) < 0){
+        if (errno == EWOULDBLOCK)
+            std::cout << "buffer is full, keep trying\n";
+    }
 }
 
 void Httpd_handler::send_error400() const {
@@ -202,7 +226,10 @@ void Httpd_handler::send_error400() const {
                "\r\n" +
                "<P>Your browser sent a bad request, " +
                "such as a POST without a Content-Length.\r\n";
-    send(client_fd_, s.c_str(), strlen(s.c_str()), 0);
+    while (send(client_fd_, s.c_str(), strlen(s.c_str()), 0) < 0){
+        if (errno == EWOULDBLOCK)
+            std::cout << "buffer is full, keep trying\n";
+    }
 }
 
 void Httpd_handler::send_error404() const {
@@ -215,7 +242,10 @@ void Httpd_handler::send_error404() const {
                "your request because the resource specified\r\n" +
                "is unavailable or nonexistent.\r\n" +
                "</BODY></HTML>\r\n";
-    send(client_fd_, s.c_str(), strlen(s.c_str()), 0);
+    while (send(client_fd_, s.c_str(), strlen(s.c_str()), 0) < 0){
+        if (errno == EWOULDBLOCK)
+            std::cout << "buffer is full, keep trying\n";
+    }
 }
 
 void Httpd_handler::send_error500() const {
@@ -223,7 +253,10 @@ void Httpd_handler::send_error500() const {
                "Content-Type: text/html\r\n" +
                "\r\n" +
                "<P>Error prohibited CGI execution.\r\n";
-    send(client_fd_, s.c_str(), strlen(s.c_str()), 0);
+    while (send(client_fd_, s.c_str(), strlen(s.c_str()), 0) < 0){
+        if (errno == EWOULDBLOCK)
+            std::cout << "buffer is full, keep trying\n";
+    }
 }
 
 void Httpd_handler::send_error501() const {
@@ -235,7 +268,10 @@ void Httpd_handler::send_error501() const {
             "</TITLE></HEAD>\r\n" +
             "<BODY><P>HTTP request method not supported.\r\n" +
             "</BODY></HTML>\r\n";
-    send(client_fd_, s.c_str(), strlen(s.c_str()), 0);
+    while (send(client_fd_, s.c_str(), strlen(s.c_str()), 0) < 0){
+        if (errno == EWOULDBLOCK)
+            std::cout << "buffer is full, keep trying\n";
+    }
 }
 
 // serve default index.html to user
@@ -247,8 +283,10 @@ void Httpd_handler::serve_file() {
 
     // open html
     std::ifstream file(path_);
-    if (!file.is_open())
+    if (!file.is_open()){
         send_error404();
+        return;
+    }
 
     // send header
     send_status200();
@@ -258,7 +296,11 @@ void Httpd_handler::serve_file() {
 #ifdef DEBUG
         std::cout << "sending: " << buffer.c_str() << std::endl;
 #endif
-        send(client_fd_, buffer.c_str(), strlen(buffer.c_str()), 0);
+        // send based on non-block socket
+        while (send(client_fd_, buffer.c_str(), strlen(buffer.c_str()), 0) < 0){
+            if (errno == EWOULDBLOCK)
+                std::cout << "buffer is full, keep trying";
+        }
     }
     std::cout << "sending complete\n";
     file.close();
@@ -273,12 +315,18 @@ void Httpd_handler::execute_cgi() {
     int status;
     int pipe_to_parent[2];
 
-    // send header
-    send_status200();
-
     if (url_ == "/")
         url_ += "test.cgi";
     path_ += url_;
+
+    std::ifstream file(path_);
+    if (!file.is_open()){
+        send_error404();
+        return;
+    }
+
+    // send header
+    send_status200();
 
     // create one-way channel
     if ((pipe(pipe_to_parent)) == -1){
@@ -323,11 +371,14 @@ void Httpd_handler::execute_cgi() {
         printf("creat child process %d\n", pid);
         // close write end
         close(pipe_to_parent[1]);
-        // read cgi execution result from pipe's
+        // read cgi execution result from pipe
         // WE HAVE TO READ RESULT FROM PIPE ONE BY ONE
         while (read(pipe_to_parent[0], &temp, sizeof(temp)) > 0){
             // send the result to the client
-            send(client_fd_, &temp, sizeof(temp), 0);
+            while (send(client_fd_, &temp, sizeof(temp), 0) < 0){
+                if (errno == EWOULDBLOCK)
+                    std::cout << "waiting for socket buffer to clear\n";
+            }
         }
         // wait for the child to exit
         waitpid(pid, &status, 0);
