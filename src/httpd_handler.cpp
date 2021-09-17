@@ -97,7 +97,7 @@ void Httpd_handler::parse_request_line() {
                 // parsing query
                 int index = url_.find('?');
                 if (index != std::string::npos){
-                    parse_params(url_.substr(index + 1, url_.size() - index), query_);
+                    parse_params(url_.substr(index + 1, url_.size() - index - 1), query_);
                     url_ = url_.substr(0, index);
                 }
                 substr_start = i + 1;
@@ -140,8 +140,6 @@ void Httpd_handler::parse_body() {
     if (content_length == -1){
         if (is_POST())
             send_error400();
-        else
-            std::cout << "Request's body is empty\n";
         return;
     }
     std::string body = buffer_str_.substr(buffer_str_.size() - content_length, content_length);
@@ -192,6 +190,16 @@ bool Httpd_handler::is_POST() {
 
 bool Httpd_handler::is_GET() {
     return method_ == "GET";
+}
+
+void Httpd_handler::check_all() {
+    std::cout << "CHECKING ALL INFO IN HTTPD_HANDLER\n";
+    std::cout << "URL:" << url_ << "\n";
+    std::cout << "METHOD:" << method_ << "\n";
+    std::cout << "VER:" << ver_ << "\n";
+    check_maps(header_);
+    check_maps(query_);
+    check_maps(params_);
 }
 
 bool Httpd_handler::method_legal() {
@@ -252,7 +260,7 @@ void Httpd_handler::send_error500() const {
     std::string s = std::string(STATUS_500) +
                "Content-Type: text/html\r\n" +
                "\r\n" +
-               "<P>Error prohibited CGI execution.\r\n";
+               "<P>Server Error.\r\n";
     while (send(client_fd_, s.c_str(), strlen(s.c_str()), 0) < 0){
         if (errno == EWOULDBLOCK)
             std::cout << "buffer is full, keep trying\n";
@@ -272,6 +280,17 @@ void Httpd_handler::send_error501() const {
         if (errno == EWOULDBLOCK)
             std::cout << "buffer is full, keep trying\n";
     }
+}
+
+std::string Httpd_handler::get_base_info() {
+    std::string info = url_ + "," + method_;
+    return info;
+}
+
+void Httpd_handler::set_base_info(const std::string& buffer_str) {
+    int split_index = buffer_str.find(',', 0);
+    url_ = buffer_str.substr(0, split_index),
+    method_ = buffer_str.substr(split_index + 1, buffer_str.size() - split_index - 1);
 }
 
 // serve default index.html to user

@@ -3,6 +3,7 @@
 //
 
 #include <fcntl.h>
+#include <sys/mman.h>
 #include <sys/epoll.h>
 #include "httpd_handler.h"
 
@@ -11,6 +12,7 @@
 
 #define SOCKET_QUEUE_SIZE 20
 #define EPOLL_FD_SIZE 256
+#define BUFFER_SIZE 256
 
 class Httpd{
 private:
@@ -18,7 +20,7 @@ private:
     // variables for epoll
     int epoll_fd_;
     struct epoll_event event_, event_list_[SOCKET_QUEUE_SIZE];
-    std::map<int, Httpd_handler*> record;  //
+    std::map<int, Httpd_handler*> record_;
 public:
     Httpd();
 
@@ -29,7 +31,13 @@ public:
 
     void loop();
 
-    void modify_event(int& socket, uint32_t events);
+    void wait_for_child(int& pid, int& status);
+
+    void sent_to_parent(char* p, Httpd_handler* handler);
+
+    void recv_from_child(char *p, char buffer[MAX_BUF_SIZE]);
+
+    void modify_event(int& socket, int op, uint32_t events);
 
     Httpd_handler* get_handler(int& client_socket);
 };

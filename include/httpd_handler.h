@@ -79,6 +79,8 @@ public:
 
     inline bool is_GET();
 
+    void check_all();
+
     bool method_legal();
 
     bool use_cgi();
@@ -89,11 +91,15 @@ public:
 
     inline void send_error404() const;
 
-    inline void send_error500() const;
+    void send_error500() const;
 
     inline void send_error501() const;
 
     // HANDLE HTTP REQUEST
+    std::string get_base_info();
+
+    void set_base_info(const std::string& buffer_str);
+
     void serve_file();
 
     void execute_cgi();
