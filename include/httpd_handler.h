@@ -17,7 +17,6 @@
 #ifndef MYHTTPD_Httpd_handler_H
 #define MYHTTPD_Httpd_handler_H
 
-#define STDIN 0
 #define STDOUT 1
 #define MAX_BUF_SIZE 1024
 #define STATUS_200 "HTTP/1.0 200 OK\r\n"

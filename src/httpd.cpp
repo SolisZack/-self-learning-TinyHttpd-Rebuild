@@ -126,9 +126,7 @@ void Httpd::accept_connection() {
 #endif
             break;
         }
-#ifdef CHECK
-        std::cout << "CLIENT SOCKET " << client_socket <<  " ACCEPTED\n";
-#endif
+        std::cout << "\nCLIENT SOCKET " << client_socket <<  " ACCEPTED\n";
         // register client_socket to epoll
         modify_event(client_socket, EPOLL_CTL_ADD, EPOLLIN | EPOLLET);
     }
@@ -139,9 +137,7 @@ void Httpd::accept_connection() {
 // This function will read and parse http request from client in child process and return info needed to parent process
 // After read, the epoll trigger event will change to EPOLLOUT
 void Httpd::read_request(int& client_socket) {
-#ifdef CHECK
     std::cout << "CLIENT SOCKET " << client_socket <<  " READING\n";
-#endif
     // var for fork
     pid_t pid;
     int status;
@@ -171,6 +167,10 @@ void Httpd::read_request(int& client_socket) {
         sent_to_parent(p, handler);
         // unmap
         munmap(p, BUFFER_SIZE);
+#ifdef CHECK
+        std::cout << "PARSE HTTP REQUEST RESULT:\n";
+        handler->check_all();
+#endif
         exit(0);
     }
     // parent process, in charge of receiving msg from child process
@@ -184,7 +184,6 @@ void Httpd::read_request(int& client_socket) {
         munmap(p, BUFFER_SIZE);
 #ifdef CHECK
         std::cout << "Receive base info from child: " << buffer_str << "\n";
-        handler->check_all();
 #endif
     }
 }
@@ -193,12 +192,10 @@ void Httpd::read_request(int& client_socket) {
 // The child process is in charge of executing http request and return the result to the "parent" process
 // The "parent" process will send result to the client
 void Httpd::response_request(int &client_socket) {
+    std::cout << "CLIENT SOCKET " << client_socket <<  " WRITING\n";
     // var for fork
     pid_t pid;
     int status;
-#ifdef CHECK
-    std::cout << "CLIENT SOCKET " << client_socket <<  " WRITING\n";
-#endif
     Httpd_handler* handler = record_[client_socket];
     // fork child process to handle request;
     pid = fork();
