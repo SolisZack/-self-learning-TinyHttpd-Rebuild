@@ -31,6 +31,12 @@ public:
 
     void loop();
 
+    void accept_connection();
+
+    void read_request(int& client_socket);
+
+    void response_request(int& client_socket);
+
     void wait_for_child(int& pid, int& status);
 
     void sent_to_parent(char* p, Httpd_handler* handler);

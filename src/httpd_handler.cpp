@@ -25,7 +25,6 @@ Httpd_handler::Httpd_handler(const Httpd_handler &copy) {
     query_ = copy.query_;
     params_ = copy.params_;
     path_ = copy.path_;
-
 }
 
 Httpd_handler::~Httpd_handler(){
@@ -152,7 +151,7 @@ void Httpd_handler::parse_body() {
 }
 
 // parameters from GET AND POST are stored in different map
-// I create a function so that I can reuse it to handle situation above
+// create a function so that the function can be reused to handle situation above
 void Httpd_handler::parse_params(const std::string& params_str, std::map<std::string, std::string>&params_map) {
     int substr_start = 0;
     std::string key, value;
@@ -169,13 +168,13 @@ void Httpd_handler::parse_params(const std::string& params_str, std::map<std::st
     params_map[key] = params_str.substr(substr_start, params_str.size() - substr_start);
 }
 
-// for DEBUG use, print maps
+// FOR DEBUG use, print maps
 void Httpd_handler::check_maps(std::map<std::string, std::string>& params_map){
     for (auto& params : params_map)
         std::cout << params.first << ":" << params.second << std::endl;
 }
 
-// for POST, get header info Content-Length
+// For POST, get header info Content-Length
 // get parameters based on Content-Length
 int Httpd_handler::get_content_length() {
     std::map<std::string, std::string>::iterator result = header_.find("Content-Length");
@@ -192,6 +191,7 @@ bool Httpd_handler::is_GET() {
     return method_ == "GET";
 }
 
+// FOR DEBUG
 void Httpd_handler::check_all() {
     std::cout << "CHECKING ALL INFO IN HTTPD_HANDLER\n";
     std::cout << "URL:" << url_ << "\n";
@@ -202,6 +202,7 @@ void Httpd_handler::check_all() {
     check_maps(params_);
 }
 
+// This function will check if the method is POST or GET
 bool Httpd_handler::method_legal() {
     if (!is_POST() && !is_GET()){
         send_error501();
@@ -210,6 +211,7 @@ bool Httpd_handler::method_legal() {
     return true;
 }
 
+// This function will judge whether execution in response
 // only execute cgi when the url contains /*.cgi,
 bool Httpd_handler::use_cgi() {
     if (strstr(url_.c_str(), ".cgi") != nullptr)
@@ -282,11 +284,13 @@ void Httpd_handler::send_error501() const {
     }
 }
 
+// This function will return needed info of the object
 std::string Httpd_handler::get_base_info() {
     std::string info = url_ + "," + method_;
     return info;
 }
 
+// This function will set needed info for the object
 void Httpd_handler::set_base_info(const std::string& buffer_str) {
     int split_index = buffer_str.find(',', 0);
     url_ = buffer_str.substr(0, split_index),
