@@ -57,10 +57,6 @@ int Httpd_handler::receive_request() {
 // functions below are added keywords "inline", so can't directly use them in class Httpd
 void Httpd_handler::parse_request() {
     parse_request_line();
-    if (!is_POST() && !is_GET()){
-        send_error501();
-        return;
-    }
     parse_header();
     parse_body();
 }
@@ -125,8 +121,11 @@ void Httpd_handler::parse_header() {
 void Httpd_handler::parse_body() {
     int content_length = get_content_length();
     if (content_length == -1){
-        if (is_POST())
+        if (is_POST()){
             send_error400();
+            close_socket();
+            exit(0);
+        }
         else
             std::cout << "Request's body is empty\n";
         return;
@@ -141,7 +140,7 @@ void Httpd_handler::parse_body() {
 }
 
 // parameters from GET AND POST are stored in different map
-// I create a function so that I can reuse it to handle situation above
+// Create a function that can be reused to handle situation above
 void Httpd_handler::parse_params(const std::string& params_str, std::map<std::string, std::string>&params_map) {
     int substr_start = 0;
     std::string key, value;
@@ -179,6 +178,14 @@ bool Httpd_handler::is_POST() {
 
 bool Httpd_handler::is_GET() {
     return method_ == "GET";
+}
+
+bool Httpd_handler::method_legal() {
+    if (!is_POST() && !is_GET()){
+        send_error501();
+        exit(0);
+    }
+    return true;
 }
 
 // only execute cgi when the url contains /*.cgi,
@@ -247,8 +254,10 @@ void Httpd_handler::serve_file() {
 
     // open html
     std::ifstream file(path_);
-    if (!file.is_open())
+    if (!file.is_open()){
         send_error404();
+        exit(0);
+    }
 
     // send header
     send_status200();
@@ -273,23 +282,30 @@ void Httpd_handler::execute_cgi() {
     int status;
     int pipe_to_parent[2];
 
-    // send header
-    send_status200();
-
     if (url_ == "/")
         url_ += "test.cgi";
     path_ += url_;
 
+    // judge if the file exists
+    std::ifstream file(path_);
+    if (!file.is_open()){
+        send_error404();
+        exit(0);
+    }
+
+    // send header
+    send_status200();
+
     // create one-way channel
     if ((pipe(pipe_to_parent)) == -1){
         send_error500();
-        return;
+        exit(0);
     }
 
     // fork to have 2 processes
     if ((pid = fork()) < 0){
         send_error500();
-        return;
+        exit(0);
     }
 
     // child process, execute cgi

@@ -14,7 +14,7 @@ Httpd::~Httpd() {
 // bind socket
 // listen
 // htons htonl ntohs ntohl(h = host, n = net, s = short, l = long)
-// used to ignore big endian and small endian problem
+// used to ignore big endian and small endian problem in different OS
 void Httpd::start_up(u_short port) {
     int err_code;
     // create socket for server
@@ -94,10 +94,12 @@ void Httpd::loop() {
 void Httpd::handle_request(Httpd_handler& handler) {
     handler.receive_request();
     handler.parse_request();
-    if (handler.use_cgi())
-        handler.execute_cgi();
-    else
-        handler.serve_file();
+    if (handler.method_legal()){
+        if (handler.use_cgi())
+            handler.execute_cgi();
+        else
+            handler.serve_file();
+    }
     handler.close_socket();
 
 

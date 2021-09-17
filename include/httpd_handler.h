@@ -76,6 +76,8 @@ public:
 
     inline bool is_GET();
 
+    bool method_legal();
+
     bool use_cgi();
 
     inline void send_status200() const;
