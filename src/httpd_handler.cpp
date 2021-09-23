@@ -102,6 +102,9 @@ void Httpd_handler::parse_request_line() {
 void Httpd_handler::parse_header() {
     for (int i = 1; i < buffer_byline_.size(); i++){
         std::string key, value;
+        // Avoid receive multiple Http request
+        if (strstr(buffer_byline_[i].c_str(), "POST") || strstr(buffer_byline_[i].c_str(), "GET"))
+            break;
         for (int j = 0; j < buffer_byline_[i].size(); j++){
             if (buffer_byline_[i][j] == ':'){
                 key = buffer_byline_[i].substr(0, j);
