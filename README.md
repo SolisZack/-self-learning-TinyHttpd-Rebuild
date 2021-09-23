@@ -89,8 +89,8 @@ cd ./bin
 │   └── main.cpp
 ├── pic							# 说明文档图片
 │   ├── 2.png
-│   ├── epoll (4).png
-│   └── master (2).png
+│   ├── epoll.png
+│   └── master.png
 ├── README.md					# 说明文档
 ```
 
