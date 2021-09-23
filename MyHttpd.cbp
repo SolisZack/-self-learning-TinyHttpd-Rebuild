@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="MyHttpd"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/wwd/CLionProjects/MyHttpd"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/wwd/CLionProjects/MyHttpd"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/wwd/CLionProjects/MyHttpd"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="MyHttpd">
+				<Option output="/home/wwd/CLionProjects/MyHttpd/bin/MyHttpd" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/wwd/CLionProjects/MyHttpd/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/wwd/CLionProjects/MyHttpd/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 MyHttpd"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="MyHttpd/fast">
+				<Option output="/home/wwd/CLionProjects/MyHttpd/bin/MyHttpd" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/wwd/CLionProjects/MyHttpd/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/wwd/CLionProjects/MyHttpd/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 MyHttpd/fast"/>
+					<CompileFile command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -f &quot;/home/wwd/CLionProjects/MyHttpd/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/wwd/CLionProjects/MyHttpd/src/httpd.cpp">
+			<Option target="MyHttpd"/>
+		</Unit>
+		<Unit filename="/home/wwd/CLionProjects/MyHttpd/src/httpd_handler.cpp">
+			<Option target="MyHttpd"/>
+		</Unit>
+		<Unit filename="/home/wwd/CLionProjects/MyHttpd/src/main.cpp">
+			<Option target="MyHttpd"/>
+		</Unit>
+		<Unit filename="/home/wwd/CLionProjects/MyHttpd/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
