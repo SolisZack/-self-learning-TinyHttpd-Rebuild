@@ -117,9 +117,6 @@ void Httpd_handler::parse_request_line() {
 // parse header, store info into a map
 void Httpd_handler::parse_header() {
     for (int i = 1; i < buffer_byline_.size(); i++){
-        // Avoid TCP stick package
-        if (strstr(buffer_byline_[i].c_str(), "POST") || strstr(buffer_byline_[i].c_str(), "GET"))
-            break;
         std::string key, value;
         for (int j = 0; j < buffer_byline_[i].size(); j++){
             if (buffer_byline_[i][j] == ':'){
