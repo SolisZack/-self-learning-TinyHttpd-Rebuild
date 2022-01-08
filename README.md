@@ -74,20 +74,20 @@ cd ./bin
 ## 文件目录
 
 ```
-├── bin							# 二进制可执行文件目录				
+├── bin							  # 二进制可执行文件目录				
 │   └── MyHttpd
-├── CMakeLists.txt				# CMake文件
+├── CMakeLists.txt		# CMake文件
 ├── htdocs						# 前端文件存放目录
 │   ├── index.html
 │   └── test.cgi
 ├── include						# 头文件目录
 │   ├── httpd.h
 │   └── httpd_handler.h
-├── src							# 源文件目录
+├── src							  # 源文件目录
 │   ├── httpd.cpp
 │   ├── httpd_handler.cpp
 │   └── main.cpp
-├── pic							# 说明文档图片
+├── pic							  # 说明文档图片
 │   ├── 2.png
 │   ├── epoll.png
 │   └── master.png
