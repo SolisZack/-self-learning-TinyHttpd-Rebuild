@@ -322,10 +322,10 @@ void Httpd_handler::serve_file() {
         // send based on non-block socket
         while (send(client_fd_, buffer.c_str(), strlen(buffer.c_str()), 0) < 0){
             if (errno == EWOULDBLOCK)
-                std::cout << "buffer is full, keep trying";
+                std::cout << "buffer is full, keep trying\n";
         }
     }
-    std::cout << "sending complete\n";
+    std::cout << "sending html file complete\n";
     file.close();
 }
 

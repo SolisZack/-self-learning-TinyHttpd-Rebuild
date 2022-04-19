@@ -4,7 +4,10 @@
 
 #include "httpd.h"
 
-Httpd::Httpd() : server_socket_(0){};
+Httpd::Httpd(){
+    server_socket_ = 0;
+    thread_pool_.init();
+}
 
 Httpd::~Httpd() {
     close(server_socket_);
@@ -12,6 +15,7 @@ Httpd::~Httpd() {
         delete pair.second;
         pair.second = nullptr;
     }
+    thread_pool_.shutPool();
 }
 
 // create server socket
@@ -91,21 +95,21 @@ void Httpd::loop() {
         for (int i = 0; i < triggered_nums; i++){
             // server_socket_ triggered event EPOLLIN, accept new connection
             if (event_list_[i].data.fd == server_socket_){
-                accept_connection();
+                thread_pool_.submitFunc(accept_connection, this);
             }
             // client_socket triggered event EPOLLIN, read http request
             else if (event_list_[i].events & EPOLLIN){
                 int client_socket = event_list_[i].data.fd;
                 if (client_socket < 0)
                     continue;
-                read_request(client_socket);
+                thread_pool_.submitFunc(read_request, client_socket, this);
             }
             // server_socket_ triggered event EPOLLOUT
             else if (event_list_[i].events & EPOLLOUT){
                 int client_socket = event_list_[i].data.fd;
                 if (client_socket < 0)
                     continue;
-                response_request(client_socket);
+                thread_pool_.submitFunc(response_request, client_socket, this);
             }
         }
     }
@@ -114,11 +118,12 @@ void Httpd::loop() {
 // Using ET mod, we don't know exactly how much connection needed to be set once triggered
 // So we use while loop to solve the problem above
 // This function will accept new connection and add it to the epoll
-void Httpd::accept_connection() {
+void Httpd::accept_connection(Httpd* this_ptr) {
+    std::cout << "\nSERVER SOCKET " << this_ptr->server_socket_ <<  " ACCEPTING\n";
     while (true){
         struct sockaddr_in client_addr{};
         socklen_t client_addr_size = sizeof(client_addr);
-        int client_socket = accept(server_socket_, (struct sockaddr*)&client_addr, &client_addr_size);
+        int client_socket = accept(this_ptr->server_socket_, (struct sockaddr*)&client_addr, &client_addr_size);
 
         if (client_socket == -1 && errno == EAGAIN){
 #ifdef CHECK
@@ -126,9 +131,9 @@ void Httpd::accept_connection() {
 #endif
             break;
         }
-        std::cout << "\nCLIENT SOCKET " << client_socket <<  " ACCEPTED\n";
+        std::cout << "CLIENT SOCKET " << client_socket <<  " ACCEPTED\n";
         // register client_socket to epoll
-        modify_event(client_socket, EPOLL_CTL_ADD, EPOLLIN | EPOLLET);
+        this_ptr->modify_event(client_socket, EPOLL_CTL_ADD, EPOLLIN | EPOLLET);
     }
 }
 
@@ -136,98 +141,48 @@ void Httpd::accept_connection() {
 // Our main process only works on the epoll work
 // This function will read and parse http request from client in child process and return info needed to parent process
 // After read, the epoll trigger event will change to EPOLLOUT
-void Httpd::read_request(int& client_socket) {
+void Httpd::read_request(int& client_socket, Httpd* this_ptr) {
     std::cout << "CLIENT SOCKET " << client_socket <<  " READING\n";
-    // var for fork
-    pid_t pid;
-    int status;
-    Httpd_handler* handler = get_handler(client_socket);
-    // USED SHARED MEMORY TO COMPLETE IPC
-    char* p = (char*) mmap(nullptr, BUFFER_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, 0, 0);
-    if (p == MAP_FAILED){
-        perror("ERROR: mmap failed\n");
-        handler->send_error500();
-        return;
-    }
-
-    // fork child process to handle request;
-    pid = fork();
-    if (pid == -1){
-        handler->send_error500();
-        perror("ERROR: fork child process failed\n");
-        return;
-    }
-
-    // child process, in charge of receiving and parsing http request
-    // after parsing request, send base info to the parent process for further execution work
-    if (pid == 0){
-        std::cout << "child process handling read event\n";
-        handler->receive_request();
-        handler->parse_request();
-        sent_to_parent(p, handler);
-        // unmap
-        munmap(p, BUFFER_SIZE);
+    // get handler
+    Httpd_handler* handler = this_ptr->get_handler(client_socket);
+    // recv and read http request
+    handler->receive_request();
+    handler->parse_request();
+    // change event to write event
+    this_ptr->modify_event(client_socket, EPOLL_CTL_MOD, EPOLLOUT | EPOLLET);
 #ifdef CHECK
-        std::cout << "PARSE HTTP REQUEST RESULT:\n";
-        handler->check_all();
+    std::cout << "PARSE HTTP REQUEST RESULT:\n";
+    handler->check_all();
 #endif
-        exit(0);
-    }
-    // parent process, in charge of receiving msg from child process
-    else if (pid > 0){
-        char buffer[BUFFER_SIZE];
-        wait_for_child(pid, status);
-        recv_from_child(p, buffer);
-        std::string buffer_str = buffer;
-        handler->set_base_info(buffer_str);
-        modify_event(client_socket, EPOLL_CTL_MOD, EPOLLOUT | EPOLLET);
-        munmap(p, BUFFER_SIZE);
-#ifdef CHECK
-        std::cout << "Receive base info from child: " << buffer_str << "\n";
-#endif
-    }
 }
 
 // Fork anther(yeah, one more another) new process to handle http request
 // The child process is in charge of executing http request and return the result to the "parent" process
 // The "parent" process will send result to the client
-void Httpd::response_request(int &client_socket) {
+void Httpd::response_request(int &client_socket, Httpd* this_ptr) {
     std::cout << "CLIENT SOCKET " << client_socket <<  " WRITING\n";
-    // var for fork
-    pid_t pid;
-    int status;
-    Httpd_handler* handler = record_[client_socket];
-    // fork child process to handle request;
-    pid = fork();
-    if (pid == -1)
-        perror("ERROR: fork child process failed\n");
-    // child process, in charge of responding to http request
-    if (pid == 0){
+    // get handler
+    Httpd_handler* handler = this_ptr->record_[client_socket];
+    // method check
+    if (!handler->method_legal())
+        handler->send_error400();
+    // response request
+    if (handler->use_cgi())
+        handler->execute_cgi();
+    else
+        handler->serve_file();
+
+    // shut down connection
+    handler->close_socket();
+    // del event
+    this_ptr->modify_event(client_socket, EPOLL_CTL_DEL, EPOLLIN | EPOLLET);
+    // del current record for accepting new connection
+    delete this_ptr->record_[client_socket];
+    this_ptr->record_[client_socket] = nullptr;
+
 #ifdef CHECK
-        handler->check_all();
+    handler->check_all();
 #endif
-        if (!handler->method_legal()){
-            handler->close_socket();
-            exit(0);
-        }
-        if (handler->use_cgi()){
-            handler->execute_cgi();
-        }
-        else{
-            handler->serve_file();
-        }
-        handler->close_socket();
-        exit(0);
-    }
-        // parent process
-    else if (pid > 0){
-        std::cout << "created child process to handle write event\n";
-        wait_for_child(pid, status);
-        modify_event(client_socket, EPOLL_CTL_DEL, EPOLLIN | EPOLLET);
-        close(client_socket);
-        delete record_[client_socket];
-        record_[client_socket] = nullptr;
-    }
 }
 
 // Our HTTPD server has a lot of "fork" action

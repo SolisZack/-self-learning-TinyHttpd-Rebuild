@@ -3,8 +3,9 @@
 #include "httpd.h"
 
 int main() {
-    Httpd httpd;
+    Httpd* httpd = new Httpd;
     u_short port = 8081;
     printf("starting up httpd at port:%d\n", port);
-    httpd.start_up(port);
+    httpd->start_up(port);
+
 }

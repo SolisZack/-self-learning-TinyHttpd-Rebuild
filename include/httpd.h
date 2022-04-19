@@ -6,6 +6,7 @@
 #include <sys/mman.h>
 #include <sys/epoll.h>
 #include "httpd_handler.h"
+#include "threadPool.h"
 
 #ifndef MYHTTPD_HTTPD_H
 #define MYHTTPD_HTTPD_H
@@ -21,6 +22,8 @@ private:
     int epoll_fd_;
     struct epoll_event event_, event_list_[SOCKET_QUEUE_SIZE];
     std::map<int, Httpd_handler*> record_;
+    // thread pool
+    ThreadPool thread_pool_;
 public:
     Httpd();
 
@@ -31,11 +34,11 @@ public:
 
     void loop();
 
-    void accept_connection();
+    static void accept_connection(Httpd* this_ptr);
 
-    void read_request(int& client_socket);
+    static void read_request(int& client_socket, Httpd* this_ptr);
 
-    void response_request(int& client_socket);
+    static void response_request(int& client_socket, Httpd* this_ptr);
 
     void wait_for_child(int& pid, int& status);
 
