@@ -73,12 +73,31 @@ cd ./bin
 ## 文件目录
 
 ```
+<<<<<<< HEAD
 ├── bin							# 二进制可执行文件目录				
 ├── CMakeLists.txt				# CMake文件
+=======
+├── bin							  # 二进制可执行文件目录				
+│   └── MyHttpd
+├── CMakeLists.txt		# CMake文件
+>>>>>>> 519dcbde9ed9c154288436656e3cd6116a0fb146
 ├── htdocs						# 前端文件存放目录
 ├── include						# 头文件目录
+<<<<<<< HEAD
 ├── src							# 源文件目录
 ├── pic							# 说明文档图片
+=======
+│   ├── httpd.h
+│   └── httpd_handler.h
+├── src							  # 源文件目录
+│   ├── httpd.cpp
+│   ├── httpd_handler.cpp
+│   └── main.cpp
+├── pic							  # 说明文档图片
+│   ├── 2.png
+│   ├── epoll.png
+│   └── master.png
+>>>>>>> 519dcbde9ed9c154288436656e3cd6116a0fb146
 ├── README.md					# 说明文档
 ```
 
