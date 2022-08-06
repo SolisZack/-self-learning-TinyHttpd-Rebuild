@@ -6,16 +6,18 @@
 
 Httpd::Httpd(){
     server_socket_ = 0;
-    thread_pool_.init();
+    thread_pool_A_.init();
+    thread_pool_B_.init();
 }
 
 Httpd::~Httpd() {
     close(server_socket_);
-    for (auto& pair : record_){
-        delete pair.second;
-        pair.second = nullptr;
-    }
-    thread_pool_.shutPool();
+//    for (auto& pair : record_){
+//        delete pair.second;
+//        pair.second = nullptr;
+//    }
+    thread_pool_A_.shutPool();
+    thread_pool_B_.shutPool();
 }
 
 // create server socket
@@ -27,6 +29,7 @@ void Httpd::start_up(u_short port) {
     int err_code;
     // create socket for server
     server_socket_ = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+    signal(SIGPIPE, SIG_IGN);
     // bind socket with address
     struct sockaddr_in addr{
         .sin_family = AF_INET,
@@ -86,30 +89,51 @@ void Httpd::start_up(u_short port) {
 // The rest of the work is for child process
 void Httpd::loop() {
     // var for epoll
-    int triggered_nums;
+//    int triggered_nums;
     // loop for accepting request
     while (true){
-        triggered_nums = epoll_wait(epoll_fd_, event_list_, SOCKET_QUEUE_SIZE, 0);
+        struct epoll_event event_list_[SOCKET_QUEUE_SIZE];
+        int triggered_nums = epoll_wait(epoll_fd_, event_list_, SOCKET_QUEUE_SIZE, 0);
         if (triggered_nums == -1)
             perror("ERROR: epoll wait failed\n");
-        for (int i = 0; i < triggered_nums; i++){
-            // server_socket_ triggered event EPOLLIN, accept new connection
-            if (event_list_[i].data.fd == server_socket_){
-                thread_pool_.submitFunc(accept_connection, this);
-            }
-            // client_socket triggered event EPOLLIN, read http request
-            else if (event_list_[i].events & EPOLLIN){
-                int client_socket = event_list_[i].data.fd;
-                if (client_socket < 0)
-                    continue;
-                thread_pool_.submitFunc(read_request, client_socket, this);
-            }
-            // server_socket_ triggered event EPOLLOUT
-            else if (event_list_[i].events & EPOLLOUT){
-                int client_socket = event_list_[i].data.fd;
-                if (client_socket < 0)
-                    continue;
-                thread_pool_.submitFunc(response_request, client_socket, this);
+        else if (triggered_nums > 0) {
+//            printf("triggered_nums:%i\n", triggered_nums);
+            for (int i = 0; i < triggered_nums; i++){
+//                printf("%i\n");
+//                printf("i:%i, triggered_nums:%i\n", i, triggered_nums);
+                // server_socket_ triggered event EPOLLIN, accept new connection
+                if (event_list_[i].data.fd == server_socket_){
+//                    printf("ACCEPTING\n");
+//                    accept_connection(this);
+                    thread_pool_A_.submitFunc(accept_connection, this);
+                }
+                    // client_socket triggered event EPOLLIN, read http request
+                else if (event_list_[i].events & EPOLLIN){
+                    int client_socket = event_list_[i].data.fd;
+                    if (client_socket < 0)
+                        continue;
+//                    printf("READING\n");
+                    thread_pool_B_.submitFunc(read_request, client_socket, this);
+                }
+                    // server_socket_ triggered event EPOLLOUT
+                else if (event_list_[i].events & EPOLLOUT){
+                    int client_socket = event_list_[i].data.fd;
+                    if (client_socket < 0)
+                        continue;
+//                    printf("WRITING\n");
+                    thread_pool_B_.submitFunc(response_request, client_socket, this);
+//                    // del event
+//                    this->modify_event(client_socket, EPOLL_CTL_DEL, NULL);
+//                    Httpd_handler* handler = this->record_[client_socket];
+//                    if (handler) {
+//                        // shut down connection
+//                        handler->close_socket();
+//                        // del current record for accepting new connection
+//                        delete handler;
+//                        this->record_[client_socket] = nullptr;
+//                    }
+
+                }
             }
         }
     }
@@ -125,12 +149,17 @@ void Httpd::accept_connection(Httpd* this_ptr) {
         socklen_t client_addr_size = sizeof(client_addr);
         int client_socket = accept(this_ptr->server_socket_, (struct sockaddr*)&client_addr, &client_addr_size);
 
-        if (client_socket == -1 && errno == EAGAIN){
+        if (client_socket == -1){
+            if (errno == EAGAIN){
 #ifdef CHECK
-            std::cout << "no more events, stop accepting\n";
+                std::cout << "no more events, stop accepting\n";
 #endif
-            break;
+                break;
+            }else
+                continue;
         }
+        std::shared_ptr<Httpd_handler> handler = this_ptr->get_handler(client_socket);
+//        this_ptr->record_[client_socket] = handler;
         std::cout << "CLIENT SOCKET " << client_socket <<  " ACCEPTED\n";
         // register client_socket to epoll
         this_ptr->modify_event(client_socket, EPOLL_CTL_ADD, EPOLLIN | EPOLLET);
@@ -141,15 +170,33 @@ void Httpd::accept_connection(Httpd* this_ptr) {
 // Our main process only works on the epoll work
 // This function will read and parse http request from client in child process and return info needed to parent process
 // After read, the epoll trigger event will change to EPOLLOUT
-void Httpd::read_request(int& client_socket, Httpd* this_ptr) {
+void Httpd::read_request(int client_socket, Httpd* this_ptr) {
     std::cout << "CLIENT SOCKET " << client_socket <<  " READING\n";
     // get handler
-    Httpd_handler* handler = this_ptr->get_handler(client_socket);
+//    Httpd_handler* handler = this_ptr->get_handler(client_socket);
+    std::shared_ptr<Httpd_handler>  handler = this_ptr->record_[client_socket];
+    if (handler) {
+        handler->receive_request();
+        handler->parse_request();
+    }
     // recv and read http request
-    handler->receive_request();
-    handler->parse_request();
+
+    // If bad request, del in epoll
+//    if (handler->getHeaderLength() == 0) {
+//        // close和modify
+//        // https://www.cnblogs.com/scw2901/p/3907657.html
+//        // del event
+//        this_ptr->modify_event(client_socket, EPOLL_CTL_DEL, NULL);
+//        // shut down connection
+//        handler->close_socket();
+//        // del current record for accepting new connection
+//        delete this_ptr->record_[client_socket];
+//        this_ptr->record_[client_socket] = nullptr;
+//        return;
+//    }
     // change event to write event
     this_ptr->modify_event(client_socket, EPOLL_CTL_MOD, EPOLLOUT | EPOLLET);
+    std::cout << "CLIENT SOCKET " << client_socket <<  " READING DONE\n";
 #ifdef CHECK
     std::cout << "PARSE HTTP REQUEST RESULT:\n";
     handler->check_all();
@@ -159,29 +206,51 @@ void Httpd::read_request(int& client_socket, Httpd* this_ptr) {
 // Fork anther(yeah, one more another) new process to handle http request
 // The child process is in charge of executing http request and return the result to the "parent" process
 // The "parent" process will send result to the client
-void Httpd::response_request(int &client_socket, Httpd* this_ptr) {
+void Httpd::response_request(int client_socket, Httpd* this_ptr) {
     std::cout << "CLIENT SOCKET " << client_socket <<  " WRITING\n";
     // get handler
-    Httpd_handler* handler = this_ptr->record_[client_socket];
+    std::shared_ptr<Httpd_handler> handler = this_ptr->record_[client_socket];
     // method check
-    if (!handler->method_legal())
-        handler->send_error400();
-    // response request
-    if (handler->use_cgi())
-        handler->execute_cgi();
-    else
-        handler->serve_file();
+    if (!handler || handler->getHeaderLength() == 0) {
+        printf("nullptr || empty!\n");
+        // del event
+        this_ptr->modify_event(client_socket, EPOLL_CTL_DEL, NULL);
+        if (handler) {
+//            delete handler;
+//            this_ptr->record_[client_socket] = nullptr;
+            handler->close_socket();
+//            this_ptr->record_.erase(client_socket);
+        }
+        std::cout << "CLIENT SOCKET " << client_socket <<  " WRITING DONE\n";
+        return;
+    }
 
+    if (!handler->method_legal()) {
+        printf("check1\n");
+        handler->send_error400();
+    }
+
+    // response request
+    if (handler->use_cgi()) {
+        printf("check2\n");
+        handler->execute_cgi();
+    }
+    else {
+        printf("check3\n");
+        handler->serve_file();
+    }
+
+    // del event
+    this_ptr->modify_event(client_socket, EPOLL_CTL_DEL, NULL);
     // shut down connection
     handler->close_socket();
-    // del event
-    this_ptr->modify_event(client_socket, EPOLL_CTL_DEL, EPOLLIN | EPOLLET);
     // del current record for accepting new connection
-    delete this_ptr->record_[client_socket];
-    this_ptr->record_[client_socket] = nullptr;
-
+//    delete handler;
+//    this_ptr->record_[client_socket] = nullptr;
+//    this_ptr->record_.erase(client_socket);
+    std::cout << "CLIENT SOCKET " << client_socket <<  " WRITING DONE\n";
 #ifdef CHECK
-    handler->check_all();
+//    handler->check_all();
 #endif
 }
 
@@ -219,14 +288,14 @@ void Httpd::recv_from_child(char *p, char* buffer) {
 }
 
 // This function will do something for the current socket based on the operation and events
-void Httpd::modify_event(int& socket, int op, uint32_t events) {
+void Httpd::modify_event(int socket, int op, uint32_t events) {
     event_.data.fd = socket;
     event_.events = events;
     epoll_ctl(epoll_fd_, op, socket, &event_);
 }
 
 // This function will get httpd_handler based on the client socket using func getsockname
-Httpd_handler* Httpd::get_handler(int& client_socket) {
+std::shared_ptr<Httpd_handler> Httpd::get_handler(int client_socket) {
     struct sockaddr_in client_addr{};
     socklen_t addr_len = sizeof(client_addr);
     int err_code = getsockname(client_socket, (struct sockaddr*)&client_addr, &addr_len);
@@ -236,7 +305,7 @@ Httpd_handler* Httpd::get_handler(int& client_socket) {
         exit(-1);
     }
 
-    Httpd_handler* handler = new Httpd_handler(client_socket, client_addr);
+    std::shared_ptr<Httpd_handler> handler = std::make_shared<Httpd_handler>(Httpd_handler(client_socket, client_addr)) ;
     record_[client_socket] = handler;
 
     return handler;

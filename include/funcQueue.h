@@ -13,22 +13,29 @@ using Func = std::function<void()>;
 
 class FuncQueue {
 private:
+    int m_capacity;
     std::queue<Func> m_queue;
     std::mutex m_mutex;
 public:
-    FuncQueue() = default;
+    FuncQueue() {
+        m_capacity = 50;
+    }
+
     ~FuncQueue() = default;
 
     // 将函数装入队列中，为保证
     void enqueue(const Func& func) {
         std::unique_lock<std::mutex> lock(m_mutex);
+        if (m_queue.size() > m_capacity)
+            m_queue.pop();
         m_queue.emplace(func);
-        std::cout << "func enqueue\n";
+        printf("func enqueue, queue.size:%i\n", m_queue.size());
     }
 
     bool dequeue(Func& func) {
         std::unique_lock<std::mutex> lock(m_mutex);
-        std::cout << "trying to get func\n";
+        printf("trying to get func, queue.size:%i\n", m_queue.size());
+//        std::cout << "trying to get func\n";
         if (m_queue.empty())
             return false;
         func = std::move(m_queue.front());  // move提升性能

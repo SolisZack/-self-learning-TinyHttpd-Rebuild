@@ -34,7 +34,7 @@ private:
             bool get_func;
             while (!m_pool->m_pool_shut) {
                 // sleep防止某一线程运行过快一直抢锁
-                // std::this_thread::sleep_for(std::chrono::milliseconds(10));
+//                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 // 也可以使用在此部分改成代码块（加个大括号）的形式解决，效果更好
                 // 以此纪念我debug了一个半小时的问题⬆️
                 {
@@ -43,17 +43,22 @@ private:
                     if (m_pool->m_funcQueue.funcQueueEmpty())
                         m_pool->m_thread_cv.wait(lock);
                     get_func = m_pool->m_funcQueue.dequeue(m_func);
+                    lock.unlock();
                 }
 
                 if (!get_func)
                     printf("thread id %i get function failed\n", m_id);
-                m_func();
+                else {
+                    printf("thread id %i get function sucess\n", m_id);
+                    m_func();
+                }
+
             }
         }
     };
 public:
     explicit ThreadPool(const int thread_num): m_pool_shut(false), m_threads(std::vector<std::thread>(thread_num)){};
-    explicit ThreadPool(): m_pool_shut(false), m_threads(std::vector<std::thread>(sysconf(_SC_NPROCESSORS_ONLN))){};
+    explicit ThreadPool(): m_pool_shut(false), m_threads(std::vector<std::thread>(sysconf(_SC_NPROCESSORS_ONLN))){};  // CPU num: sysconf(_SC_NPROCESSORS_ONLN)
     ~ThreadPool() = default;
 
     void init() {

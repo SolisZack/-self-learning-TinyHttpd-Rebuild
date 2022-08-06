@@ -3,6 +3,7 @@
 //
 
 #include <fcntl.h>
+#include <unordered_map>
 #include <sys/mman.h>
 #include <sys/epoll.h>
 #include "httpd_handler.h"
@@ -11,7 +12,7 @@
 #ifndef MYHTTPD_HTTPD_H
 #define MYHTTPD_HTTPD_H
 
-#define SOCKET_QUEUE_SIZE 20
+#define SOCKET_QUEUE_SIZE 1024
 #define EPOLL_FD_SIZE 256
 #define BUFFER_SIZE 256
 
@@ -21,9 +22,9 @@ private:
     // variables for epoll
     int epoll_fd_;
     struct epoll_event event_, event_list_[SOCKET_QUEUE_SIZE];
-    std::map<int, Httpd_handler*> record_;
+    std::unordered_map<int, std::shared_ptr<Httpd_handler>> record_;
     // thread pool
-    ThreadPool thread_pool_;
+    ThreadPool thread_pool_A_, thread_pool_B_;
 public:
     Httpd();
 
@@ -36,9 +37,9 @@ public:
 
     static void accept_connection(Httpd* this_ptr);
 
-    static void read_request(int& client_socket, Httpd* this_ptr);
+    static void read_request(int client_socket, Httpd* this_ptr);
 
-    static void response_request(int& client_socket, Httpd* this_ptr);
+    static void response_request(int client_socket, Httpd* this_ptr);
 
     void wait_for_child(int& pid, int& status);
 
@@ -46,9 +47,9 @@ public:
 
     void recv_from_child(char *p, char buffer[MAX_BUF_SIZE]);
 
-    void modify_event(int& socket, int op, uint32_t events);
+    void modify_event(int socket, int op, uint32_t events);
 
-    Httpd_handler* get_handler(int& client_socket);
+    std::shared_ptr<Httpd_handler> get_handler(int client_socket);
 };
 
 

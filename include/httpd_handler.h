@@ -47,7 +47,7 @@ public:
     // INIT SOCKET
     Httpd_handler();
 
-    Httpd_handler(int& fd, struct sockaddr_in& addr);
+    Httpd_handler(int fd, struct sockaddr_in& addr);
 
     Httpd_handler(const Httpd_handler& copy);
 
@@ -102,6 +102,8 @@ public:
     void serve_file();
 
     void execute_cgi();
+
+    int getHeaderLength();
 
 };
 
